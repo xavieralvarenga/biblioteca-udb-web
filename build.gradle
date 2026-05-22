@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+    id 'war' // Para generar un archivo .war desplegable en Tomcat
+}
+
+group = 'com'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    dependencies {
+        // Servlets y JSP API (Para Tomcat / Jakarta o Java EE dependiente de la versión)
+        compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0' // O javax.servlet si es Tomcat 9 o menor
+        compileOnly 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.1.0'
+
+        // El conector de MySQL para comunicarte con DBeaver
+        implementation 'com.mysql:mysql-connector-j:8.3.0'
+
+        // JSTL para evitar código Java (scriptlets) en tus JSPs
+        implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
+        implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
+
+        // Lombok
+        compileOnly 'org.projectlombok:lombok:1.18.30'
+        annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+war {
+    archiveFileName = 'biblioteca-web.war'
+}
