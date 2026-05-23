@@ -132,5 +132,23 @@
     </form>
 </div>
 
+<%--
+    Módulo de Encargados - Barra de Sesión Activa
+    Este bloque verifica si existe un usuario en sesión y renderiza la opción de cerrar sesión.
+--%>
+<div style="background-color: #e9ecef; padding: 10px 20px; margin-bottom: 20px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+    <span>
+        Bienvenido(a),
+        <strong>
+            <c:out value="${sessionScope.usuarioLogueado.nombres} ${sessionScope.usuarioLogueado.apellidos}" default="Encargado" />
+        </strong>
+        (<c:out value="${sessionScope.usuarioLogueado.nombreRol}" default="Personal" />)
+    </span>
+    <a href="${pageContext.request.contextPath}/login?accion=logout"
+       style="background-color: #dc3545; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px;">
+       Cerrar Sesión
+    </a>
+</div>
+
 </body>
 </html>

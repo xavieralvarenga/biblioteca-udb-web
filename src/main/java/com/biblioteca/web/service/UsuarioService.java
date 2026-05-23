@@ -24,4 +24,27 @@ public class UsuarioService {
 
         return usuarioDAO.restablecerPassword(carnet, nuevaPassword);
     }
+
+    /**
+     * Valida las credenciales de un usuario para permitir el ingreso al sistema.
+     * * @param carnet El carnet proporcionado por el usuario.
+     * @param password La contraseña en texto plano ingresada en el formulario.
+     * @return El objeto {@link Usuario} autenticado si las credenciales son válidas;
+     * {@code null} si las credenciales son incorrectas o el usuario no existe.
+     */
+    public Usuario autenticar(String carnet, String password) {
+        if (carnet == null || carnet.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            return null;
+        }
+
+        Usuario usuario = usuarioDAO.obtenerPorCarnet(carnet);
+
+        if (usuario != null) {
+            // Nota: En producción, comparar el hash usando BCrypt.checkpw(password, usuario.getPasswordHash())
+            if (usuario.getPasswordHash().equals(password)) {
+                return usuario;
+            }
+        }
+        return null;
+    }
 }
