@@ -24,8 +24,12 @@
     <h2 style="text-align: center; margin-top: 0;">Biblioteca Don Bosco</h2>
     <p style="text-align: center; color: #6c757d;">Ingreso al Sistema</p>
 
+    <%-- Mensajes Dinámicos administrados desde la URL de la Raíz --%>
     <c:if test="${param.error == 'CredencialesIncorrectas'}">
         <div class="alert alert-danger">Carnet o contraseña incorrectos.</div>
+    </c:if>
+    <c:if test="${param.error == 'InicieSesion'}">
+        <div class="alert alert-danger">Acceso denegado. Por favor, inicie sesión.</div>
     </c:if>
     <c:if test="${param.msg == 'SesionCerrada'}">
         <div class="alert alert-info">Sesión cerrada de forma segura.</div>

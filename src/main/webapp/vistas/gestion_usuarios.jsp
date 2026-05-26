@@ -133,8 +133,8 @@
 </div>
 
 <%--
-    Módulo de Encargados - Barra de Sesión Activa
-    Este bloque verifica si existe un usuario en sesión y renderiza la opción de cerrar sesión.
+    Módulo de Encargados - Barra de Control de Sesión Activa
+    Renderiza la información de auditoría del usuario actual en sesión y el mecanismo de salida.
 --%>
 <div style="background-color: #e9ecef; padding: 10px 20px; margin-bottom: 20px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
     <span>

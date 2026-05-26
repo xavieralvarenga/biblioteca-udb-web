@@ -13,8 +13,9 @@ import java.io.IOException;
 
 /**
  * Controlador Servlet encargado de gestionar el inicio y cierre de sesión de la aplicación.
- * Mapea las solicitudes de autenticación en la URL {@code /login}.
+ * Intercepta las solicitudes de autenticación mapeadas en la URL {@code /login}.
  * * @author Xavier Larios
+ * @version 1.1
  */
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
@@ -22,39 +23,42 @@ public class LoginServlet extends HttpServlet {
     private final UsuarioService usuarioService = new UsuarioService();
 
     /**
-     * Procesa las peticiones GET para el control de sesiones, específicamente la acción de logout.
-     * * @param request  la solicitud HTTP que contiene el parámetro opcional de acción.
-     * @param response la respuesta HTTP para ejecutar la redirección al login.
-     * @throws ServletException si ocurre un error en la transición del servlet.
-     * @throws IOException      si el archivo de destino no es accesible.
+     * Muestra la interfaz del formulario de Login o procesa la destrucción de la sesión activa (Logout).
+     * Ajustado para localizar el archivo login.jsp en la raíz de la carpeta webapp.
+     *
+     * @param request La solicitud HTTP entrante.
+     * @param response La respuesta HTTP saliente.
+     * @throws ServletException Si ocurre un error en la transición interna del contenedor web.
+     * @throws IOException Si se genera un fallo de Entrada/Salida durante las redirecciones.
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String accion = request.getParameter("accion");
 
+        // Manejo del Cierre de Sesión (Logout)
         if ("logout".equals(accion)) {
-            // Recupera la sesión actual si existe, sin crear una nueva (false)
             HttpSession session = request.getSession(false);
             if (session != null) {
-                // Remueve todos los atributos y destruye la sesión por completo en el servidor
-                session.invalidate();
+                session.invalidate(); // Destruye por completo los datos en memoria de la sesión
             }
-            // Redirige al login anexando un mensaje de éxito para que sea capturado en la interfaz
-            response.sendRedirect(request.getContextPath() + "/vistas/login.jsp?msg=SesionCerrada");
+            // Redirección hacia login.jsp ubicado en la raíz de la web app
+            response.sendRedirect(request.getContextPath() + "/login.jsp?msg=SesionCerrada");
             return;
         }
 
-        request.getRequestDispatcher("/vistas/login.jsp").forward(request, response);
+        // Despacha la petición a login.jsp en la raíz de webapp
+        request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
 
     /**
-     * Procesa los datos del formulario de autenticación enviados mediante POST.
+     * Procesa los parámetros de autenticación enviados desde el formulario mediante el método POST.
+     * Realiza una redirección condicional hacia la zona administrativa si el usuario posee rol de Encargado.
      *
-     * @param request La solicitud HTTP con los parámetros de carnet y contraseña.
-     * @param response La respuesta HTTP.
-     * @throws ServletException Si ocurre un error interno.
-     * @throws IOException Si ocurre un error de redirección.
+     * @param request La solicitud HTTP contenedora de las credenciales del usuario.
+     * @param response La respuesta HTTP destinada al redireccionamiento.
+     * @throws ServletException Si ocurre un fallo interno del componente.
+     * @throws IOException Si ocurre un error en la ruta de redirección.
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -66,24 +70,19 @@ public class LoginServlet extends HttpServlet {
         Usuario usuarioAutenticado = usuarioService.autenticar(carnet, password);
 
         if (usuarioAutenticado != null) {
-            // Se crea la sesión HTTP y guardamos el objeto usuario en memoria
             HttpSession session = request.getSession(true);
             session.setAttribute("usuarioLogueado", usuarioAutenticado);
 
-            // Redirección condicional según las reglas del requerimiento (Módulo Encargados)
+            // Redirección condicional según las reglas del Módulo de Encargados
             if ("Administrador".equalsIgnoreCase(usuarioAutenticado.getNombreRol())) {
-                response.sendRedirect(request.getContextPath() + "/usuarios"); // Va a la zona de administración
-                System.out.println("Usuario " + usuarioAutenticado.getNombres() + " " + usuarioAutenticado.getApellidos() + " ha iniciado sesión como Administrador.");
+                response.sendRedirect(request.getContextPath() + "/usuarios");
             } else {
-                // Si entra un estudiante o profesor, lo mandamos al módulo de consultas (A crear en el futuro)
-                response.sendRedirect(request.getContextPath() + "/login.jsp");
-                System.out.println("Usuario con datos erroneos ha intentado iniciar sesión: " + carnet);
+                // Estudiantes o profesores que no son administradores (Próxima fase)
+                response.sendRedirect(request.getContextPath() + "/vistas/index_general.jsp");
             }
         } else {
-            // Credenciales incorrectas, regresa al login con bandera de error
-            response.sendRedirect(request.getContextPath() + "/vistas/login.jsp?error=CredencialesIncorrectas");
+            // Credenciales inválidas, regresa a login.jsp en la raíz con bandera de error
+            response.sendRedirect(request.getContextPath() + "/login.jsp?error=CredencialesIncorrectas");
         }
     }
-
-
 }
