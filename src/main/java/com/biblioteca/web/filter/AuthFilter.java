@@ -14,7 +14,7 @@ import java.io.IOException;
  * * @author Xavier Larios
  * @version 1.1
  */
-@WebFilter(urlPatterns = {"/usuarios", "/vistas/*"})
+@WebFilter(urlPatterns = {"/usuarios", "/menu", "/documentos", "/vistas/*"})
 public class AuthFilter implements Filter {
 
     @Override
