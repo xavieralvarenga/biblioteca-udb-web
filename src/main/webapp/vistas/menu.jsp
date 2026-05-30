@@ -1,5 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%-- 1. PRIMERO SE IMPORTA LA LIBRERÍA --%>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
+
+<%-- 2. SEGUNDO SE EVALÚA LA SEGURIDAD DE LA SESIÓN --%>
+<c:if test="${empty sessionScope.usuarioLogueado}">
+    <c:redirect url="/login.jsp?error=SesionInvalida"/>
+</c:if>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,8 +15,8 @@
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
         .navbar { background-color: #343a40; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .navbar a { color: #dc3545; text-decoration: none; font-weight: bold; background-color: white; padding: 6px 12px; border-radius: 4px; }
-        .navbar a:hover { background-color: #f8f9fa; }
+        .navbar a { color: #dc3545; text-decoration: none; font-weight: bold; background-color: white; padding: 6px 12px; border-radius: 4px; border: 1px solid transparent; }
+        .navbar a:hover { background-color: #f8f9fa; border-color: #dc3545; }
         .container { max-width: 900px; margin: 50px auto; padding: 0 20px; text-align: center; }
         .welcome-text { color: #212529; margin-bottom: 40px; }
         .menu-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; }
@@ -25,7 +32,8 @@
 
     <div class="navbar">
         <div>
-            Sistema Bibliotecario | <strong><c:out value="${sessionScope.usuarioLogueado.nombres} ${sessionScope.usuarioLogueado.apellidos}"/></strong>
+            <strong>Sistema Bibliotecario Don Bosco</strong> |
+            <span><c:out value="${sessionScope.usuarioLogueado.nombres} ${sessionScope.usuarioLogueado.apellidos}"/></span>
             <span style="color: #adb5bd; font-size: 13px; margin-left: 10px;">[<c:out value="${sessionScope.usuarioLogueado.nombreRol}"/>]</span>
         </div>
         <a href="${pageContext.request.contextPath}/login?accion=logout">Cerrar Sesión</a>
@@ -48,7 +56,7 @@
                 </div>
             </c:if>
 
-            <%-- MÓDULO 2: INVENTARIO DE DOCUMENTOS (Acceso Universal) --%>
+            <%-- MÓDULO 2: INVENTARIO DE DOCUMENTOS --%>
             <div class="menu-card">
                 <h3>Catálogo de Ejemplares</h3>
                 <c:choose>
@@ -62,11 +70,11 @@
                 <a href="${pageContext.request.contextPath}/documentos" class="btn-enter">Ingresar</a>
             </div>
 
-            <%-- MÓDULO 3: PRÉSTAMOS Y DEVOLUCIONES (Próxima fase) --%>
-            <div class="menu-card" style="opacity: 0.8;">
-                <h3>Préstamos y Moras</h3>
-                <p>Gestión operativa de préstamos activos, fechas límites y alertas algorítmicas.</p>
-                <a href="#" class="btn-enter" style="background-color: #6c757d; cursor: not-allowed;">Próximamente</a>
+            <%-- MÓDULO 3: PRÉSTAMOS Y DEVOLUCIONES --%>
+            <div class="menu-card" style="opacity: 0.7; background-color: #f8f9fa;">
+                <h3 style="color: #6c757d;">Préstamos y Moras</h3>
+                <p>Gestión operativa de préstamos activos, fechas límites y alertas algorítmicas de cobro.</p>
+                <a href="#" class="btn-enter" style="background-color: #6c757d; cursor: not-allowed;" onclick="return false;">Próximamente</a>
             </div>
 
         </div>

@@ -9,47 +9,49 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Filtro de seguridad perimetral encargado de restringir el ingreso no autorizado
- * al Módulo de Encargados y a las vistas protegidas del sistema.
+ * Filtro de seguridad perimetral encargado de verificar la existencia de una sesión
+ * activa antes de permitir el acceso a los recursos protegidos del sistema.
  * * @author Xavier Larios
- * @version 1.1
+ * @version 2.0
  */
-@WebFilter(urlPatterns = {"/usuarios", "/menu", "/documentos", "/vistas/*"})
+// 1. Asegúrate de incluir '/menu' y asegurar la subcarpeta '/vistas/*'
+@WebFilter(urlPatterns = {"/menu", "/documentos", "/usuarios", "/vistas/*"})
 public class AuthFilter implements Filter {
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {}
+    public void init(FilterConfig filterConfig) throws ServletException {
+        // Inicialización opcional si se requiere
+    }
 
-    /**
-     * Intercepta las solicitudes web para validar el estado de la sesión.
-     * Si no se encuentra un usuario logueado en el sistema, deniega el paso
-     * redirigiéndolo de forma mandatoria hacia el formulario raíz login.jsp.
-     *
-     * @param request La solicitud entrante al servidor.
-     * @param response La respuesta saliente del servidor.
-     * @param chain La cadena de ejecución de filtros de Tomcat.
-     * @throws IOException Si ocurre un fallo en el pipeline de comunicación.
-     * @throws ServletException Si ocurre una excepción interna de los servlets.
-     */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+        String requestURI = httpRequest.getRequestURI();
         HttpSession session = httpRequest.getSession(false);
 
-        Usuario usuario = (session != null) ? (Usuario) session.getAttribute("usuarioLogueado") : null;
+        // 2. Definir rutas públicas que NO necesitan autenticación para evitar bucles
+        boolean esPaginaLogin = requestURI.endsWith("login.jsp");
+        boolean esServletLogin = requestURI.endsWith("/login");
+        boolean esRecursoEstatico = requestURI.contains("/css/") || requestURI.contains("/js/") || requestURI.contains("/imagenes/");
 
-        if (usuario == null) {
-            // Intercepta e impide el acceso, redirigiendo a la raíz del proyecto
-            httpResponse.sendRedirect(httpRequest.getContextPath() + "/login.jsp?error=InicieSesion");
-        } else {
-            // Permite continuar el flujo ordinario hacia el recurso web solicitado
+        // Verificar si el usuario ya inició sesión
+        Usuario usuarioLogueado = (session != null) ? (Usuario) session.getAttribute("usuarioLogueado") : null;
+
+        if (usuarioLogueado != null || esPaginaLogin || esServletLogin || esRecursoEstatico) {
+            // Si está logueado o intenta entrar al login legítimamente, se le permite el paso
             chain.doFilter(request, response);
+        } else {
+            // Si no está logueado y quiere forzar la URL (ej: /menu o /documentos), directo al login
+            httpResponse.sendRedirect(httpRequest.getContextPath() + "/login.jsp?error=AccesoDenegado");
         }
     }
 
     @Override
-    public void destroy() {}
+    public void destroy() {
+        // Limpieza de recursos si es necesario
+    }
 }
