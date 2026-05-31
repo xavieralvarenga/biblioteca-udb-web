@@ -21,7 +21,7 @@ public class DatabaseConnection {
     private static final String USER = "root";
 
     /** Contraseña de acceso a la base de datos MySQL. */
-    private static final String PASSWORD = "Eljokernoesunvillano1$";
+    private static final String PASSWORD = "jkrt878p";
 
     /**
      * Constructor privado para evitar la instanciación de esta clase de utilidad.
