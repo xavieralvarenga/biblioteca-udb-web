@@ -20,6 +20,7 @@
         .badge { padding: 5px 10px; border-radius: 4px; color: white; font-size: 12px; font-weight: bold; }
         .badge-admin { background-color: #dc3545; }
         .badge-user { background-color: #17a2b8; }
+        .link-op { font-weight: bold; text-decoration: none; margin: 0 4px; }
     </style>
 
     <%-- Bloque JS protegido de forma segura --%>
@@ -181,8 +182,10 @@
                     </td>
                     <c:if test="${sessionScope.usuarioLogueado.nombreRol eq 'Administrador'}">
                         <td>
-                            <a href="${pageContext.request.contextPath}/documentos?accion=cargarEditar&id=${doc.idDocumento}" style="color: #ffc107; font-weight:bold; text-decoration:none;">Editar</a> |
-                            <a href="${pageContext.request.contextPath}/documentos?accion=eliminar&id=${doc.idDocumento}" onclick="return confirm('¿Eliminar de forma permanente este recurso?');" style="color:#dc3545; font-weight:bold; text-decoration:none;">Eliminar</a>
+                            <%-- NUEVO ENLACE: Permite navegar a la gestión de ejemplares físicos usando el ID del documento --%>
+                            <a href="${pageContext.request.contextPath}/ejemplares?idDocumento=${doc.idDocumento}" class="link-op" style="color: #20c997;">Ejemplares</a> |
+                            <a href="${pageContext.request.contextPath}/documentos?accion=cargarEditar&id=${doc.idDocumento}" class="link-op" style="color: #ffc107;">Editar</a> |
+                            <a href="${pageContext.request.contextPath}/documentos?accion=eliminar&id=${doc.idDocumento}" onclick="return confirm('¿Eliminar de forma permanente este recurso?');" class="link-op" style="color:#dc3545;">Eliminar</a>
                         </td>
                     </c:if>
                 </tr>
