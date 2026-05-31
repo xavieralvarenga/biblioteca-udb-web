@@ -20,6 +20,8 @@
         .badge { padding: 5px 10px; border-radius: 4px; color: white; font-size: 12px; font-weight: bold; }
         .badge-admin { background-color: #dc3545; }
         .badge-user { background-color: #17a2b8; }
+        .badge-activo { background-color: #28a745; color: white; }
+        .badge-inactivo { background-color: #6c757d; color: white; }
         .link-op { font-weight: bold; text-decoration: none; margin: 0 4px; }
     </style>
 
@@ -96,10 +98,10 @@
                     <div><label>Ubicación Física:</label><input type="text" name="ubicacionFisica" value="<c:out value='${docEditar.ubicacionFisica}'/>" required></div>
                     <div><label>Código de Barras:</label><input type="text" name="codigoDeBarras" value="<c:out value='${docEditar.codigoDeBarras}'/>" required></div>
                     <div>
-                        <label>Estado:</label>
+                        <label>Estado del Documento:</label>
                         <select name="estado">
-                            <option value="Disponible" ${docEditar.estado == 'Disponible' ? 'selected' : ''}>Disponible</option>
-                            <option value="Prestado" ${docEditar.estado == 'Prestado' ? 'selected' : ''}>Prestado</option>
+                            <option value="Activo" ${docEditar.estado == 'Activo' ? 'selected' : ''}>Activo</option>
+                            <option value="Inactivo" ${docEditar.estado == 'Inactivo' ? 'selected' : ''}>Inactivo</option>
                         </select>
                     </div>
                 </div>
@@ -161,7 +163,17 @@
                     </td>
                     <td><strong><c:out value="${doc.titulo}"/></strong></td>
                     <td><c:out value="${doc.autor}"/></td>
-                    <td><c:out value="${doc.estado}"/></td>
+                    <td>
+                        <%-- Visualización de estados optimizada estéticamente con Badges --%>
+                        <c:choose>
+                            <c:when test="${doc.estado eq 'Activo'}">
+                                <span class="badge badge-activo">Activo</span>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="badge badge-inactivo">Inactivo</span>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
                     <td>
                         <c:choose>
                             <c:when test="${doc.idTipoDoc == 1}">
@@ -182,7 +194,6 @@
                     </td>
                     <c:if test="${sessionScope.usuarioLogueado.nombreRol eq 'Administrador'}">
                         <td>
-                            <%-- NUEVO ENLACE: Permite navegar a la gestión de ejemplares físicos usando el ID del documento --%>
                             <a href="${pageContext.request.contextPath}/ejemplares?idDocumento=${doc.idDocumento}" class="link-op" style="color: #20c997;">Ejemplares</a> |
                             <a href="${pageContext.request.contextPath}/documentos?accion=cargarEditar&id=${doc.idDocumento}" class="link-op" style="color: #ffc107;">Editar</a> |
                             <a href="${pageContext.request.contextPath}/documentos?accion=eliminar&id=${doc.idDocumento}" onclick="return confirm('¿Eliminar de forma permanente este recurso?');" class="link-op" style="color:#dc3545;">Eliminar</a>
