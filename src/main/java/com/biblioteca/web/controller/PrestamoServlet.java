@@ -40,23 +40,22 @@ public class PrestamoServlet extends HttpServlet {
                     request.getRequestDispatcher("/vistas/Prestamos/DetallePrestamo.jsp").forward(request, response);
                     break;
                 case "devolver":
-                    // 1. Atrapamos el ID del préstamo de la URL
                     int idPrestamoDev = Integer.parseInt(request.getParameter("id"));
-                    
+
                     // 2. Traemos los detalles y la mora desde el DAO
                     List<Object[]> detallesDevolucion = new PrestamoDAO().obtenerDetallesParaDevolucion(idPrestamoDev);
-                    
+
                     // 3. Calculamos el total de la mora sumando el valor de cada libro (índice 7 del Object[])
                     double totalMora = 0;
-                    for(Object[] fila : detallesDevolucion) {
+                    for (Object[] fila : detallesDevolucion) {
                         totalMora += (double) fila[7];
                     }
-                    
+
                     // 4. Empaquetamos todo para la vista
                     request.setAttribute("detallesDevolucion", detallesDevolucion);
                     request.setAttribute("idPrestamo", idPrestamoDev);
                     request.setAttribute("totalMora", totalMora);
-                    
+
                     request.getRequestDispatcher("/vistas/Prestamos/DevolucionPrestamo.jsp").forward(request, response);
                     break;
                 case "listar":
@@ -81,7 +80,7 @@ public class PrestamoServlet extends HttpServlet {
 
         try {
             if ("guardar".equals(accion)) {
-                
+
                 // 1. Atrapamos el ID del Lector (Viene del input hidden)
                 String idUsuarioStr = request.getParameter("idUsuario");
                 if (idUsuarioStr == null || idUsuarioStr.isEmpty()) {
@@ -94,9 +93,8 @@ public class PrestamoServlet extends HttpServlet {
                 java.time.LocalDate fechaRegreso = java.time.LocalDate.parse(request.getParameter("fechaRegreso"));
 
                 // 3. Atrapamos TODOS los libros del carrito
-                // Usamos getParameterValues porque hay múltiples inputs con el name="idsEjemplares"
                 String[] arrayIdsEjemplares = request.getParameterValues("idsEjemplares");
-                
+
                 if (arrayIdsEjemplares == null || arrayIdsEjemplares.length == 0) {
                     throw new Exception("El carrito está vacío. Agrega al menos un material.");
                 }
@@ -107,9 +105,7 @@ public class PrestamoServlet extends HttpServlet {
 
                 for (String idStr : arrayIdsEjemplares) {
                     idsEjemplaresList.add(Integer.parseInt(idStr));
-                    // Como en la web pedimos una sola fecha global para todo el carrito, 
-                    // la repetimos para cada libro en la lista
-                    fechasLimitesList.add(fechaRegreso); 
+                    fechasLimitesList.add(fechaRegreso);
                 }
 
                 // 5. Enviamos todo a la base de datos a través del DAO
@@ -124,23 +120,36 @@ public class PrestamoServlet extends HttpServlet {
                 }
 
             } else if ("devolver".equals(accion)) {
-                // 1. Atrapamos los datos del formulario de pago
+
                 int idPrestamo = Integer.parseInt(request.getParameter("idPrestamo"));
-                double montoPagado = Double.parseDouble(request.getParameter("montoPagado"));
                 String observaciones = request.getParameter("observaciones");
 
-                // 2. Enviamos al DAO
+                // Detecta qué botón HTML se presionó
+                String tipoPago = request.getParameter("tipoPago");
+                boolean pagoCompleto = "completo".equals(tipoPago);
+
                 PrestamoDAO prestamoDAO = new PrestamoDAO();
-                boolean exito = prestamoDAO.procesarDevolucionCompleta(idPrestamo, montoPagado, observaciones);
+                boolean exito = prestamoDAO.procesarDevolucionCompleta(idPrestamo, pagoCompleto, observaciones);
 
                 if (exito) {
                     response.sendRedirect(request.getContextPath() + "/Prestamos?accion=listar&mensaje=devolucion_ok");
                 } else {
-                    throw new Exception("Error interno al procesar la devolución en la base de datos.");
+                    throw new Exception("Error interno al procesar la devolución.");
+                }
+
+            } else if ("pagarDeuda".equals(accion)) {
+
+                int idPrestamo = Integer.parseInt(request.getParameter("idPrestamo"));
+                boolean exito = new PrestamoDAO().pagarDeudaPrestamo(idPrestamo);
+
+                if (exito) {
+                    response.sendRedirect(request.getContextPath() + "/Prestamos?accion=listar&mensaje=pago_ok");
+                } else {
+                    throw new Exception("Error al procesar el pago de la deuda.");
                 }
             }
-            
-        } catch (Exception e) {
+
+        } catch (Exception e) { // <--- ¡AQUÍ FALTABA LA LLAVE DE CIERRE DEL TRY!
             System.err.println("Error en el POST de PrestamoServlet: " + e.getMessage());
             // Si hay error, lo mandamos de regreso al formulario con el mensaje
             request.setAttribute("error", e.getMessage());

@@ -79,3 +79,7 @@
 0:0:0:0:0:0:0:1 - - [31/May/2026:01:49:14 -0600] "POST /biblioteca-web/Prestamos HTTP/1.1" 302 -
 0:0:0:0:0:0:0:1 - - [31/May/2026:01:49:14 -0600] "GET /biblioteca-web/Prestamos?accion=listar&mensaje=devolucion_ok HTTP/1.1" 200 47705
 0:0:0:0:0:0:0:1 - - [31/May/2026:01:49:18 -0600] "GET /biblioteca-web/Prestamos?accion=devolver&id=9 HTTP/1.1" 200 4864
+0:0:0:0:0:0:0:1 - - [31/May/2026:09:45:29 -0600] "GET /biblioteca-web HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [31/May/2026:09:45:34 -0600] "GET /biblioteca-web/ HTTP/1.1" 200 2028
+0:0:0:0:0:0:0:1 - - [31/May/2026:09:45:40 -0600] "POST /biblioteca-web/login HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [31/May/2026:09:45:41 -0600] "GET /biblioteca-web/menu HTTP/1.1" 200 6420

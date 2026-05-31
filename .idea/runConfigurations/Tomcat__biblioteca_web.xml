@@ -5,7 +5,7 @@
     <predefined_log_file id="Tomcat Catalina Log" />
     <predefined_log_file id="Tomcat Manager Log" />
     <predefined_log_file id="Tomcat Host Manager Log" />
-    <option name="catalinaBase" value="C:\UNIVERSIDAD\biblioteca-udb-web" />
+    <option name="catalinaBase" value="" />
     <option name="contextPath" value="/biblioteca-web" />
     <option name="docBase" value="$PROJECT_DIR$/src/main/webapp" />
     <option name="envOptions">
