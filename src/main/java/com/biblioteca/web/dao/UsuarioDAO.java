@@ -7,8 +7,39 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UsuarioDAO {
+
+    public List<Usuario> obtenerTodosLosUsuarios() {
+        List<Usuario> lista = new ArrayList<>();
+        // Hacemos el JOIN con TipoUsuario para traer el nombre del rol (Alumno, Docente, etc.)
+        String sql = "SELECT u.*, t.nombre_rol FROM Usuarios u " +
+                "INNER JOIN TipoUsuario t ON u.id_tipo = t.id_tipo " +
+                "WHERE u.Estado = 'Activo'";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Usuario usuario = new Usuario();
+                usuario.setIdUsuario(rs.getInt("ID_Usuario"));
+                usuario.setIdTipo(rs.getInt("id_tipo"));
+                usuario.setNombres(rs.getString("Nombres"));
+                usuario.setCarnetDocenteAlumno(rs.getString("carnet_docente_alumno"));
+                usuario.setEstadoMora(rs.getBoolean("estado_mora"));
+                usuario.setEstado(rs.getString("Estado"));
+                usuario.setNombreRol(rs.getString("nombre_rol"));
+
+                lista.add(usuario);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
 
     // 1. Registrar un nuevo usuario
     public boolean insertarUsuario(Usuario usuario) {

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Context docBase="C:/UNIVERSIDAD/biblioteca-udb-web/src/main/webapp">
+  <Resources cacheMaxSize="10240">
+    <PreResources base="C:/UNIVERSIDAD/biblioteca-udb-web/build/classes/java/main" className="org.apache.catalina.webresources.DirResourceSet" webAppMount="/WEB-INF/classes"/>
+    <PostResources base="C:/Users/salaalvara/.gradle/caches/modules-2/files-2.1/jakarta.servlet.jsp.jstl/jakarta.servlet.jsp.jstl-api/3.0.0/8ace30b09ce88dc6f19d4f59251cc83a23cc180a/jakarta.servlet.jsp.jstl-api-3.0.0.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/jakarta.servlet.jsp.jstl-api-3.0.0.jar"/>
+    <PostResources base="C:/Users/salaalvara/.gradle/caches/modules-2/files-2.1/jakarta.servlet/jakarta.servlet-api/6.0.0/abecc699286e65035ebba9844c03931357a6a963/jakarta.servlet-api-6.0.0.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/jakarta.servlet-api-6.0.0.jar"/>
+    <PostResources base="C:/Users/salaalvara/.gradle/caches/modules-2/files-2.1/com.mysql/mysql-connector-j/8.3.0/1cc7fa5d61f4bbc113531a4ba6d85d41cf3d57e1/mysql-connector-j-8.3.0.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/mysql-connector-j-8.3.0.jar"/>
+    <PostResources base="C:/Users/salaalvara/.gradle/caches/modules-2/files-2.1/org.glassfish.web/jakarta.servlet.jsp.jstl/3.0.1/78909a1354585b2a7a2d3b4e348fceff8b6d180/jakarta.servlet.jsp.jstl-3.0.1.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/jakarta.servlet.jsp.jstl-3.0.1.jar"/>
+    <PostResources base="C:/Users/salaalvara/.gradle/caches/modules-2/files-2.1/jakarta.el/jakarta.el-api/5.0.0/2a22b304920f43d6427cdefb5ce5f6726e2a63a3/jakarta.el-api-5.0.0.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/jakarta.el-api-5.0.0.jar"/>
+    <PostResources base="C:/Users/salaalvara/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protobuf-java/3.25.1/2933a5c3f022456d8842323fe0d7fb2d25a7e3c7/protobuf-java-3.25.1.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/protobuf-java-3.25.1.jar"/>
+  </Resources>
+</Context>
