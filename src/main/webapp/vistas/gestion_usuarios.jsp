@@ -90,9 +90,9 @@
         <div class="form-group">
             <label>Privilegios / Rol de Usuario:</label>
             <select name="idTipo" required>
-                <option value="1" ${userEditar.idTipo == 1 ? 'selected' : ''}>Estudiante</option>
+                <option value="1" ${userEditar.idTipo == 1 ? 'selected' : ''}>Administrador</option>
                 <option value="2" ${userEditar.idTipo == 2 ? 'selected' : ''}>Profesor</option>
-                <option value="3" ${userEditar.idTipo == 3 ? 'selected' : ''}>Encargado (Bibliotecario)</option>
+                <option value="3" ${userEditar.idTipo == 3 ? 'selected' : ''}>Estudiante</option>
             </select>
         </div>
 

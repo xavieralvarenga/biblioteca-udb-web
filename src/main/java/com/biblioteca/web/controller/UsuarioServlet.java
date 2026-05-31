@@ -8,7 +8,6 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
@@ -21,16 +20,15 @@ public class UsuarioServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Verificación de roles (Opcional pero recomendado)
-        HttpSession session = request.getSession(false);
-        Usuario logueado = (session != null) ? (Usuario) session.getAttribute("usuarioLogueado") : null;
-
         String accion = request.getParameter("accion");
         if (accion == null) accion = "listar";
 
         if ("cargarEditar".equals(accion)) {
             int id = Integer.parseInt(request.getParameter("id"));
             Usuario uEditar = usuarioDAO.obtenerPorId(id);
+            if (uEditar == null) {
+                uEditar = usuarioDAO.obtenerPorId(id);
+            }
             request.setAttribute("userEditar", uEditar);
         } else if ("eliminar".equals(accion)) {
             int id = Integer.parseInt(request.getParameter("id"));
@@ -39,7 +37,7 @@ public class UsuarioServlet extends HttpServlet {
             return;
         }
 
-        // Por defecto siempre recargamos la lista abajo
+        // Siempre recargamos la lista para mostrarla en la tabla inferior
         List<Usuario> listaUsuarios = usuarioDAO.obtenerTodosLosUsuarios();
         request.setAttribute("usuarios", listaUsuarios);
 
@@ -50,7 +48,6 @@ public class UsuarioServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        request.setCharacterEncoding("UTF-8");
         String accion = request.getParameter("accion");
 
         if ("registrar".equals(accion)) {
@@ -60,7 +57,7 @@ public class UsuarioServlet extends HttpServlet {
         } else if ("restablecer".equals(accion)) {
             procesarRestablecer(request, response);
         } else {
-            response.sendRedirect(request.getContextPath() + "/usuarios?error=AccionNoValida");
+            response.sendRedirect(request.getContextPath() + "/usuarios?accion=listar");
         }
     }
 
@@ -72,7 +69,9 @@ public class UsuarioServlet extends HttpServlet {
             nuevoUsuario.setNombres(request.getParameter("nombres"));
             nuevoUsuario.setApellidos(request.getParameter("apellidos"));
             nuevoUsuario.setCarnetDocenteAlumno(request.getParameter("carnet"));
-            nuevoUsuario.setPasswordHash(request.getParameter("password"));
+
+            String passwordInput = request.getParameter("password");
+            nuevoUsuario.setPasswordHash(passwordInput != null && !passwordInput.isEmpty() ? passwordInput : "123456");
             nuevoUsuario.setEstadoMora(false);
             nuevoUsuario.setEstado("Activo");
 
@@ -114,6 +113,7 @@ public class UsuarioServlet extends HttpServlet {
 
     private void procesarRestablecer(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        // Corregido: Mismo nombre de parámetro que el input del formulario JSP ("carnet")
         String carnet = request.getParameter("carnet");
         String nuevaPassword = request.getParameter("nuevaPassword");
 
