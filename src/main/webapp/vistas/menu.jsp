@@ -168,6 +168,12 @@
                                             <a href="${pageContext.request.contextPath}/Prestamos?accion=listar"
                                                 class="btn-enter">Agregar</a>
                                         </div>
+                                        <div class="menu-card">
+                                            <h3 style="color: #6c757d;">Configuración de Mora</h3>
+                                            <p>Gestión operativa de mora por año</p>
+                                            <a href="${pageContext.request.contextPath}/ConfiguracionMora"
+                                                class="btn-enter">Agregar</a>
+                                        </div>
 
                         </div>
                     </div>

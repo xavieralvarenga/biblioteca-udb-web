@@ -15,7 +15,7 @@ import java.io.IOException;
  * @version 2.0
  */
 // 1. Asegúrate de incluir '/menu' y asegurar la subcarpeta '/vistas/*'
-@WebFilter(urlPatterns = {"/menu", "/documentos", "/usuarios", "/vistas/*"})
+@WebFilter(urlPatterns = {"/menu", "/documentos", "/usuarios","/Prestamos", "/ConfiguracionMora", "/vistas/*"})
 public class AuthFilter implements Filter {
 
     @Override
@@ -36,7 +36,8 @@ public class AuthFilter implements Filter {
         // 2. Definir rutas públicas que NO necesitan autenticación para evitar bucles
         boolean esPaginaLogin = requestURI.endsWith("login.jsp");
         boolean esServletLogin = requestURI.endsWith("/login");
-        boolean esRecursoEstatico = requestURI.contains("/css/") || requestURI.contains("/js/") || requestURI.contains("/imagenes/");
+        boolean esRecursoEstatico = requestURI.contains("/assets/") || requestURI.contains("/css/") || requestURI.contains("/js/") || requestURI.contains("/imagenes/");
+        
 
         // Verificar si el usuario ya inició sesión
         Usuario usuarioLogueado = (session != null) ? (Usuario) session.getAttribute("usuarioLogueado") : null;
