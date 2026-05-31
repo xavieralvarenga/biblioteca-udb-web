@@ -13,6 +13,56 @@
         .btn-menu { display: inline-block; background-color: #6c757d; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-bottom: 15px; }
         .badge { padding: 4px 8px; border-radius: 4px; color: white; font-size: 12px; font-weight: bold; }
         .badge-info { background-color: #17a2b8; }
+        .search-container {
+                background: white;
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+
+            .search-container input,
+            .search-container select {
+                padding: 10px;
+                border: 1px solid #ced4da;
+                border-radius: 6px;
+                font-size: 14px;
+                outline: none;
+                transition: 0.2s;
+            }
+
+            .search-container input:focus,
+            .search-container select:focus {
+                border-color: #17a2b8;
+                box-shadow: 0 0 4px rgba(23,162,184,0.4);
+            }
+
+            .search-container button {
+                padding: 10px 15px;
+                background-color: #17a2b8;
+                border: none;
+                color: white;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+                transition: 0.2s;
+            }
+
+            .search-container button:hover {
+                background-color: #138496;
+            }
+
+            .search-container .clear-btn {
+                background-color: #6c757d;
+            }
+
+            .search-container .clear-btn:hover {
+                background-color: #5a6268;
+            }
     </style>
 </head>
 <body>
@@ -28,6 +78,41 @@
     <a href="${pageContext.request.contextPath}/menu" class="btn-menu">← Volver al Menú Principal</a>
 
     <h2>Catálogo General de Documentos (Consulta)</h2>
+
+    <form method="get" action="${pageContext.request.contextPath}/documentos"
+          class="search-container">
+
+        <input type="hidden" name="accion" value="listar">
+
+        <input type="text"
+               name="buscar"
+               placeholder="Buscar por título o autor..."
+               value="${param.buscar}">
+
+        <select name="tipo">
+            <option value="">Todos los tipos</option>
+            <option value="1" ${param.tipo=='1' ? 'selected' : ''}>Libro</option>
+            <option value="2" ${param.tipo=='2' ? 'selected' : ''}>Revista</option>
+            <option value="3" ${param.tipo=='3' ? 'selected' : ''}>CD</option>
+        </select>
+
+        <select name="estado">
+            <option value="">Todos los estados</option>
+            <option value="Disponible" ${param.estado=='Disponible' ? 'selected' : ''}>Disponible</option>
+            <option value="Prestado" ${param.estado=='Prestado' ? 'selected' : ''}>Prestado</option>
+            <option value="Dañado" ${param.estado=='Dañado' ? 'selected' : ''}>Dañado</option>
+            <option value="Extraviado" ${param.estado=='Extraviado' ? 'selected' : ''}>Extraviado</option>
+        </select>
+
+        <button type="submit">Buscar</button>
+
+        <a href="${pageContext.request.contextPath}/documentos"
+           class="clear-btn"
+           style="text-decoration:none; padding:10px 15px; border-radius:6px; color:white; display:inline-block;">
+            Limpiar
+        </a>
+
+    </form>
 
     <table>
         <thead>

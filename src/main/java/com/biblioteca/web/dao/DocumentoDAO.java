@@ -78,6 +78,104 @@ public class DocumentoDAO {
         return lista;
     }
 
+    public List<Documento> buscarDocumentos(String buscar,
+                                            String tipo,
+                                            String estado) {
+
+        List<Documento> lista = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT d.id_documento, d.id_tipo_doc, d.titulo, d.autor, " +
+                        "d.ubicacion_fisica, d.codigo_de_barras, d.estado, " +
+                        "t.Nombre AS nombre_tipo, " +
+                        "l.isbn, l.editorial, l.edicion, " +
+                        "r.issn, r.volumen, r.mes_publicacion, " +
+                        "c.duracion_minutos, c.tipo_contenido, " +
+                        "(SELECT COUNT(*) FROM Ejemplar e WHERE e.id_documento = d.id_documento) AS total_ejemplares " +
+                        "FROM Documento d " +
+                        "INNER JOIN TipoDocumento t ON d.id_tipo_doc = t.id_tipo_doc " +
+                        "LEFT JOIN Libro l ON d.id_documento = l.id_documento " +
+                        "LEFT JOIN Revista r ON d.id_documento = r.id_documento " +
+                        "LEFT JOIN CD c ON d.id_documento = c.id_documento " +
+                        "WHERE 1=1 "
+        );
+
+        List<Object> parametros = new ArrayList<>();
+
+        if (buscar != null && !buscar.trim().isEmpty()) {
+            String like = "%" + buscar + "%";
+            sql.append(" AND (d.titulo LIKE ? OR d.autor LIKE ?) ");
+            parametros.add(like);
+            parametros.add(like);
+        }
+
+        if (tipo != null && !tipo.trim().isEmpty()) {
+            sql.append(" AND d.id_tipo_doc = ? ");
+            parametros.add(Integer.parseInt(tipo));
+        }
+
+        if (estado != null && !estado.trim().isEmpty()) {
+            sql.append(" AND d.estado = ? ");
+            parametros.add(estado);
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < parametros.size(); i++) {
+                ps.setObject(i + 1, parametros.get(i));
+            }
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+
+                String nombreTipo = rs.getString("nombre_tipo");
+                Documento doc;
+
+                if ("Libro".equalsIgnoreCase(nombreTipo)) {
+
+                    Libro l = new Libro();
+                    l.setIsbn(rs.getString("isbn"));
+                    l.setEditorial(rs.getString("editorial"));
+                    l.setEdicion(rs.getString("edicion"));
+                    doc = l;
+
+                } else if ("Revista".equalsIgnoreCase(nombreTipo)) {
+
+                    Revista r = new Revista();
+                    r.setIssn(rs.getString("issn"));
+                    r.setVolumen(rs.getString("volumen"));
+                    r.setMesPublicacion(rs.getString("mes_publicacion"));
+                    doc = r;
+
+                } else {
+
+                    CD c = new CD();
+                    c.setDuracionMinutos(rs.getInt("duracion_minutos"));
+                    c.setTipoContenido(rs.getString("tipo_contenido"));
+                    doc = c;
+                }
+
+                doc.setIdDocumento(rs.getInt("id_documento"));
+                doc.setIdTipoDoc(rs.getInt("id_tipo_doc"));
+                doc.setTitulo(rs.getString("titulo"));
+                doc.setAutor(rs.getString("autor"));
+                doc.setUbicacionFisica(rs.getString("ubicacion_fisica"));
+                doc.setCodigoDeBarras(rs.getString("codigo_de_barras"));
+                doc.setEstado(rs.getString("estado"));
+                doc.setCantidadEjemplares(rs.getInt("total_ejemplares"));
+
+                lista.add(doc);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
     public boolean insertarLibro(Libro libro) {
         String sqlDoc = "INSERT INTO Documento (id_tipo_doc, titulo, autor, ubicacion_fisica, codigo_de_barras, estado) VALUES (?, ?, ?, ?, ?, ?)";
         String sqlLib = "INSERT INTO Libro (id_documento, isbn, editorial, edicion) VALUES (?, ?, ?, ?)";

@@ -50,7 +50,7 @@ public class DocumentoServlet extends HttpServlet {
 
                     if (docEditar != null) {
                         request.setAttribute("docEditar", docEditar);
-                        List<Documento> listaDocumentos = documentoDAO.listarTodos();
+                        List<Documento> listaDocumentos = documentoDAO. listarTodos();
                         request.setAttribute("documentos", listaDocumentos);
 
                         request.getRequestDispatcher("/vistas/crud_documentos.jsp").forward(request, response);
@@ -87,9 +87,29 @@ public class DocumentoServlet extends HttpServlet {
             return;
         }
 
-        // --- FLUJO PRINCIPAL: LISTAR ---
+        // --- FLUJO PRINCIPAL: LISTAR FILTRADO ---
         if (accion == null || "listar".equals(accion)) {
-            List<Documento> listaDocumentos = documentoDAO.listarTodos();
+            String buscar = request.getParameter("buscar");
+            String tipo = request.getParameter("tipo");
+            String estado = request.getParameter("estado");
+
+            List<Documento> listaDocumentos;
+
+            if ((buscar != null && !buscar.isBlank())
+                    || (tipo != null && !tipo.isBlank())
+                    || (estado != null && !estado.isBlank())) {
+
+                listaDocumentos = documentoDAO.buscarDocumentos(
+                        buscar,
+                        tipo,
+                        estado
+                );
+
+            } else {
+
+                listaDocumentos = documentoDAO.listarTodos();
+            }
+
             request.setAttribute("documentos", listaDocumentos);
 
             if (esAutorizado) {
