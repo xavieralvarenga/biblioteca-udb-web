@@ -71,6 +71,37 @@ public class UsuarioDAO {
         return null;
     }
 
+    public Usuario obtenerPorIdDetalle(int idUsuario) {
+        Usuario usuario = null;
+        // Hacemos INNER JOIN con tipousuario usando los nombres exactos de tus capturas
+        String sql = "SELECT u.ID_Usuario, u.Nombres, u.Apellidos, u.carnet_docente_alumno, " +
+                     "t.nombre_rol, t.max_libros_permitidos, t.max_dias_prestamo " +
+                     "FROM usuarios u " +
+                     "INNER JOIN tipousuario t ON u.id_tipo = t.id_tipo " +
+                     "WHERE u.ID_Usuario = ?";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    usuario = new Usuario();
+                    usuario.setIdUsuario(rs.getInt("ID_Usuario"));
+                    usuario.setNombres(rs.getString("Nombres"));
+                    usuario.setApellidos(rs.getString("Apellidos"));
+                    usuario.setCarnetDocenteAlumno(rs.getString("carnet_docente_alumno")); // Ajusta si tu setter se llama distinto
+                    usuario.setNombreRol(rs.getString("nombre_rol"));
+                    usuario.setMaxLibrosPermitidos(rs.getInt("max_libros_permitidos"));
+                    usuario.setMaxDiasPrestamo(rs.getInt("max_dias_prestamo"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener usuario: " + e.getMessage());
+        }
+        return usuario;
+    }
+
+    
     public boolean insertarUsuario(Usuario usuario) {
         String sql = "INSERT INTO Usuarios (id_tipo, Nombres, Apellidos, carnet_docente_alumno, password_hash, estado_mora, Estado) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();

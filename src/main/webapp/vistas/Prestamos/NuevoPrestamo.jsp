@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
     <%@ taglib uri="jakarta.tags.core" prefix="c" %>
+
         <!DOCTYPE html>
         <html lang="es">
 
@@ -56,6 +57,13 @@
                         </ol>
                     </nav>
                 </div>
+                <c:if test="${not empty error}">
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-octagon me-1"></i>
+                        <strong>¡No se pudo procesar!</strong> ${error}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </c:if>
 
                 <section class="section">
                     <form action="${pageContext.request.contextPath}/Prestamos" method="POST" id="formPrestamo">

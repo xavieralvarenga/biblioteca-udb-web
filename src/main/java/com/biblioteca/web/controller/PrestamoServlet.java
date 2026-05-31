@@ -37,6 +37,16 @@ public class PrestamoServlet extends HttpServlet {
                     request.getRequestDispatcher("/vistas/Prestamos/NuevoPrestamo.jsp").forward(request, response);
                     break;
                 case "detalle":
+                    int idParaDetalle = Integer.parseInt(request.getParameter("id"));
+                    
+                    PrestamoDAO daoDetalle = new PrestamoDAO();
+                    Prestamos cabecera = daoDetalle.obtenerPrestamoPorId(idParaDetalle);
+                    List<Object[]> listaDetalles = daoDetalle.obtenerDetallesPorPrestamo(idParaDetalle);
+                    
+                    // Empaquetamos para la vista
+                    request.setAttribute("prestamoCabecera", cabecera);
+                    request.setAttribute("listaDetalles", listaDetalles);
+                    
                     request.getRequestDispatcher("/vistas/Prestamos/DetallePrestamo.jsp").forward(request, response);
                     break;
                 case "devolver":
@@ -98,6 +108,30 @@ public class PrestamoServlet extends HttpServlet {
                 if (arrayIdsEjemplares == null || arrayIdsEjemplares.length == 0) {
                     throw new Exception("El carrito está vacío. Agrega al menos un material.");
                 }
+                // ==========================================================
+                // LÓGICA DE NEGOCIO: VALIDACIÓN DE LÍMITES POR TIPO DE USUARIO
+                // ==========================================================
+
+                // 1. Traemos al usuario con sus límites desde la base de datos
+                Usuario lector = new UsuarioDAO().obtenerPorIdDetalle(idUsuario);
+
+                // 2. Validar límite de DÍAS (Fechas)
+                long diasSolicitados = java.time.temporal.ChronoUnit.DAYS.between(fechaPrestamo, fechaRegreso);
+                if (diasSolicitados > lector.getMaxDiasPrestamo()) {
+                    throw new Exception("Regla excedida: El perfil '" + lector.getNombreRol() +
+                            "' solo puede pedir materiales por un máximo de " + lector.getMaxDiasPrestamo() + " días.");
+                }
+
+                // 3. Validar límite de CANTIDAD (Libros en casa + Libros en carrito)
+                int librosYaPrestados = new PrestamoDAO().contarLibrosActivosPorUsuario(idUsuario);
+                int librosEnCarrito = arrayIdsEjemplares.length;
+
+                if ((librosYaPrestados + librosEnCarrito) > lector.getMaxLibrosPermitidos()) {
+                    throw new Exception("Límite superado: Un '" + lector.getNombreRol() + "' solo puede tener " +
+                            lector.getMaxLibrosPermitidos() + " libros en total. " +
+                            "Actualmente tiene " + librosYaPrestados + " sin devolver y quiere llevarse " + librosEnCarrito + ".");
+                }
+                
 
                 // 4. Convertimos los Arrays a las Listas que espera tu DAO
                 List<Integer> idsEjemplaresList = new java.util.ArrayList<>();
@@ -149,10 +183,24 @@ public class PrestamoServlet extends HttpServlet {
                 }
             }
 
-        } catch (Exception e) { // <--- ¡AQUÍ FALTABA LA LLAVE DE CIERRE DEL TRY!
+        } catch (Exception e) { 
             System.err.println("Error en el POST de PrestamoServlet: " + e.getMessage());
-            // Si hay error, lo mandamos de regreso al formulario con el mensaje
+            
+            // 1. Mandamos el mensaje de error rojo
             request.setAttribute("error", e.getMessage());
+            
+            // 2. ¡EL ARREGLO! Volvemos a cargar las listas para que las ventanas modales no salgan vacías
+            try {
+                List<Usuario> listaUsuario = new UsuarioDAO().obtenerTodosLosUsuarios();
+                request.setAttribute("listaUsuario", listaUsuario);
+                
+                List<com.biblioteca.web.model.Ejemplar> listaEjemplares = new com.biblioteca.web.dao.EjemplarDAO().obtenerEjemplaresDisponibles();
+                request.setAttribute("listaEjemplares", listaEjemplares);
+            } catch (Exception ex) {
+                System.err.println("Error recargando modales: " + ex.getMessage());
+            }
+
+            // 3. Devolvemos al usuario a la pantalla
             request.getRequestDispatcher("/vistas/Prestamos/NuevoPrestamo.jsp").forward(request, response);
         }
     }

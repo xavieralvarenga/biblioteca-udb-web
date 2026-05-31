@@ -16,6 +16,8 @@ public class Usuario {
     private String passwordHash;
     private boolean estadoMora;
     private String estado;
+    private int maxLibrosPermitidos;
+    private int maxDiasPrestamo;
 
     // Campo extra opcional para mostrar el nombre del rol en la vista sin complicar el DAO
     private String nombreRol;

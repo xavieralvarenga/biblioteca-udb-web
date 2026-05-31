@@ -80,24 +80,37 @@
                                                 value="$ ${totalMora}" readonly>
                                         </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label">Monto a Pagar ($):</label>
-                                            <input type="number" step="0.01" min="0" class="form-control"
-                                                name="montoPagado" value="${totalMora == 0 ? '0' : ''}" required
-                                                ${totalMora==0 ? 'readonly' : '' } placeholder="Ej. 1.50">
-                                        </div>
-
                                         <div class="mb-4">
                                             <label class="form-label">Observaciones sobre el estado físico:</label>
                                             <textarea class="form-control" name="observaciones" rows="3"
                                                 placeholder="Libros en buen estado..."></textarea>
                                         </div>
 
-                                        <div class="d-grid gap-2">
-                                            <button type="submit" class="btn btn-success btn-lg">
-                                                <i class="bi bi-check-circle"></i> Confirmar Devolución
-                                            </button>
-                                        </div>
+                                        <c:choose>
+                                            <c:when test="${totalMora > 0}">
+                                                <div class="d-grid gap-2">
+                                                    <button type="submit" name="tipoPago" value="completo"
+                                                        class="btn btn-success btn-lg">
+                                                        <i class="bi bi-cash"></i> Devolver y Pagar Todo ($
+                                                        ${totalMora})
+                                                    </button>
+
+                                                    <button type="submit" name="tipoPago" value="deuda"
+                                                        class="btn btn-warning btn-lg">
+                                                        <i class="bi bi-journal-x"></i> Solo Devolver (Generar Deuda)
+                                                    </button>
+                                                </div>
+                                            </c:when>
+
+                                            <c:otherwise>
+                                                <div class="d-grid gap-2">
+                                                    <button type="submit" name="tipoPago" value="completo"
+                                                        class="btn btn-primary btn-lg">
+                                                        <i class="bi bi-check-circle"></i> Confirmar Devolución
+                                                    </button>
+                                                </div>
+                                            </c:otherwise>
+                                        </c:choose>
                                     </form>
 
                                 </div>

@@ -47,13 +47,16 @@
         <body>
 
             <header id="header" class="header fixed-top d-flex align-items-center">
+
                 <div class="d-flex align-items-center">
-                    <button onclick="history.back()" class="btn btn-outline-primary d-flex align-items-center gap-2">
+                    <a href="${pageContext.request.contextPath}/menu"
+                        class="btn btn-outline-primary d-flex align-items-center gap-2">
                         <i class="bi bi-arrow-left"></i>
-                        <span>Regresar</span>
-                    </button>
+                        <span>Regresar al Menú</span>
+                    </a>
                 </div>
             </header>
+
 
             <main id="main" class="main">
 
@@ -161,28 +164,65 @@
 
                                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                                     <li>
-                                                                        <a class="dropdown-item" href="#">
+                                                                        <a class="dropdown-item"
+                                                                            href="${pageContext.request.contextPath}/Prestamos?accion=detalle&id=${prestamo.idPrestamo}">
                                                                             <i class="bi bi-eye text-info me-2"></i> Ver
                                                                             detalle
                                                                             préstamo
                                                                         </a>
                                                                     </li>
 
-                                                                    <li>
-                                                                        <a class="dropdown-item" href="#">
-                                                                            <i
-                                                                                class="bi bi-person-gear text-primary me-2"></i>
-                                                                            Cambiar lector
-                                                                        </a>
-                                                                    </li>
-                                                                    <li>
-                                                                        <a class="dropdown-item text-success"
-                                                                            href="${pageContext.request.contextPath}/Prestamos?accion=devolver&id=${prestamo.idPrestamo}">
-                                                                            <i
-                                                                                class="bi bi-arrow-return-left text-success me-2"></i>
-                                                                            Procesar Devolución
-                                                                        </a>
-                                                                    </li>
+
+                                                                    <c:choose>
+                                                                        <c:when
+                                                                            test="${prestamo.estadoGeneral == 'CONDEUDA'}">
+                                                                            <li>
+                                                                                <form
+                                                                                    action="${pageContext.request.contextPath}/Prestamos"
+                                                                                    method="POST"
+                                                                                    style="display:inline;"
+                                                                                    onsubmit="return confirm('¿Confirmas que el estudiante entregó el pago de $ ${prestamo.totalDeuda}?');">
+                                                                                    <input type="hidden" name="accion"
+                                                                                        value="pagarDeuda">
+                                                                                    <input type="hidden"
+                                                                                        name="idPrestamo"
+                                                                                        value="${prestamo.idPrestamo}">
+                                                                                    <button type="submit"
+                                                                                        class="dropdown-item text-success bg-transparent border-0 w-100 text-start">
+                                                                                        <i
+                                                                                            class="bi bi-cash text-success me-2"></i>
+                                                                                        Pagar Deuda ($
+                                                                                        ${prestamo.totalDeuda})
+                                                                                    </button>
+                                                                                </form>
+                                                                            </li>
+                                                                        </c:when>
+
+                                                                        <c:when
+                                                                            test="${prestamo.estadoGeneral == 'ACTIVO' || prestamo.estadoGeneral == 'PARCIAL'}">
+                                                                            <li>
+                                                                                <a class="dropdown-item text-primary"
+                                                                                    href="${pageContext.request.contextPath}/Prestamos?accion=devolver&id=${prestamo.idPrestamo}">
+                                                                                    <i
+                                                                                        class="bi bi-arrow-return-left text-primary me-2"></i>
+                                                                                    Procesar Devolución
+                                                                                </a>
+                                                                            </li>
+                                                                        </c:when>
+
+                                                                        <c:when
+                                                                            test="${prestamo.estadoGeneral == 'FINALIZADO'}">
+                                                                            <li>
+                                                                                <a class="dropdown-item text-muted disabled"
+                                                                                    href="#" tabindex="-1"
+                                                                                    aria-disabled="true">
+                                                                                    <i
+                                                                                        class="bi bi-check2-all text-muted me-2"></i>
+                                                                                    Préstamo Completado
+                                                                                </a>
+                                                                            </li>
+                                                                        </c:when>
+                                                                    </c:choose>
 
                                                                     <li>
                                                                         <hr class="dropdown-divider">

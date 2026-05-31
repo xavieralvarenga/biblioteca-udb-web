@@ -11,23 +11,33 @@ public class PrestamoDAO {
 
     public List<Prestamos> obtenerTodosLosPrestamos() {
         List<Prestamos> lista = new ArrayList<>();
+        
+        // ¡AQUÍ ESTÁ LA SUB-CONSULTA QUE FALTABA (total_deuda)!
         String sql = "SELECT p.id_prestamo, u.carnet_docente_alumno, u.Nombres, p.fecha_prestamo, p.estado_general, " +
-                "(SELECT COUNT(*) FROM Detalle_Prestamo dp WHERE dp.id_prestamo = p.id_prestamo) AS total_items " +
-                "FROM Prestamo p INNER JOIN Usuarios u ON p.id_usuario = u.ID_Usuario";
+                     "(SELECT COUNT(*) FROM detalle_prestamo dp WHERE dp.id_prestamo = p.id_prestamo) AS total_items, " +
+                     "(SELECT COALESCE(SUM(monto_mora - monto_pagado), 0) FROM detalle_prestamo dp WHERE dp.id_prestamo = p.id_prestamo AND dp.estado_pago_mora = 'Pendiente') AS total_deuda " +
+                     "FROM prestamo p INNER JOIN usuarios u ON p.id_usuario = u.ID_Usuario ORDER BY p.id_prestamo DESC";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
+             
             while (rs.next()) {
                 Prestamos prestamo = new Prestamos();
                 prestamo.setIdPrestamo(rs.getInt("id_prestamo"));
                 prestamo.setFechaPrestamo(rs.getDate("fecha_prestamo").toLocalDate());
+                
                 String estadoDesdeBD = rs.getString("estado_general");
                 if (estadoDesdeBD != null) {
                     prestamo.setEstadoGeneral(Prestamos.EstadoGeneral.valueOf(estadoDesdeBD.replace(" ", "").toUpperCase()));
                 }
+                
                 prestamo.setNombres(rs.getString("Nombres"));
                 prestamo.setCarnetDocenteAlumno(rs.getString("carnet_docente_alumno"));
+                
+                // ¡ESTA LÍNEA ES VITAL PARA QUE EL BOTÓN MUESTRE LA CANTIDAD REAL!
+                prestamo.setTotalDeuda(rs.getDouble("total_deuda"));
+                
                 lista.add(prestamo);
             }
         } catch (SQLException e) {
@@ -79,6 +89,68 @@ public class PrestamoDAO {
         } finally {
             if (con != null) { con.setAutoCommit(true); con.close(); }
         }
+    }
+
+    // --- MÉTODOS PARA VER EL DETALLE DEL PRÉSTAMO ---
+
+    public Prestamos obtenerPrestamoPorId(int idPrestamo) {
+        Prestamos prestamo = null;
+        String sql = "SELECT p.id_prestamo, u.carnet_docente_alumno, u.Nombres, p.fecha_prestamo, p.estado_general " +
+                "FROM prestamo p INNER JOIN usuarios u ON p.id_usuario = u.ID_Usuario " +
+                "WHERE p.id_prestamo = ?";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idPrestamo);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    prestamo = new Prestamos();
+                    prestamo.setIdPrestamo(rs.getInt("id_prestamo"));
+                    prestamo.setCarnetDocenteAlumno(rs.getString("carnet_docente_alumno"));
+                    prestamo.setNombres(rs.getString("Nombres"));
+                    prestamo.setFechaPrestamo(rs.getDate("fecha_prestamo").toLocalDate());
+
+                    String estado = rs.getString("estado_general");
+                    if (estado != null) {
+                        prestamo.setEstadoGeneral(Prestamos.EstadoGeneral.valueOf(estado.replace(" ", "").toUpperCase()));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener cabecera del préstamo: " + e.getMessage());
+        }
+        return prestamo;
+    }
+
+    public List<Object[]> obtenerDetallesPorPrestamo(int idPrestamo) {
+        List<Object[]> lista = new ArrayList<>();
+        String sql = "SELECT dp.id_detalle, e.codigo_de_barras, d.titulo, dp.fecha_limite, dp.estado_item, dp.estado_pago_mora " +
+                "FROM detalle_prestamo dp " +
+                "INNER JOIN ejemplar e ON dp.id_ejemplar = e.id_ejemplar " +
+                "INNER JOIN documento d ON e.id_documento = d.id_documento " +
+                "WHERE dp.id_prestamo = ?";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idPrestamo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new Object[]{
+                            rs.getInt("id_detalle"),
+                            rs.getString("codigo_de_barras"),
+                            rs.getString("titulo"),
+                            rs.getDate("fecha_limite").toLocalDate(),
+                            rs.getString("estado_item"),
+                            rs.getString("estado_pago_mora")
+                    });
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener detalles del préstamo: " + e.getMessage());
+        }
+        return lista;
     }
 
     public List<Object[]> obtenerDetallesParaDevolucion(int idPrestamo) {
@@ -250,4 +322,29 @@ public class PrestamoDAO {
             ps.executeUpdate();
         }
     }
+
+    // =========================================================================
+    // VALIDACIONES DE REGLAS DE NEGOCIO
+    // =========================================================================
+    
+    public int contarLibrosActivosPorUsuario(int idUsuario) {
+        int totalActivos = 0;
+        String sql = "SELECT COUNT(*) FROM detalle_prestamo dp " +
+                     "INNER JOIN prestamo p ON dp.id_prestamo = p.id_prestamo " +
+                     "WHERE p.id_usuario = ? AND dp.estado_item = 'Activo'";
+                     
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idUsuario);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    totalActivos = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al contar libros activos: " + e.getMessage());
+        }
+        return totalActivos;
+    }
+
 }

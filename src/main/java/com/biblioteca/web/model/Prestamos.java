@@ -16,4 +16,12 @@ public class Prestamos {
         ACTIVO, CONDEUDA, FINALIZADO, PARCIAL
     };
     private EstadoGeneral estadoGeneral;
+    private double totalDeuda;
+    public double getTotalDeuda() {
+        return totalDeuda;
+    }
+
+    public void setTotalDeuda(double totalDeuda) {
+        this.totalDeuda = totalDeuda;
+    }
 }
