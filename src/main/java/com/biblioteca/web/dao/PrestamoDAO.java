@@ -11,8 +11,7 @@ public class PrestamoDAO {
 
     public List<Prestamos> obtenerTodosLosPrestamos() {
         List<Prestamos> lista = new ArrayList<>();
-        
-        // ¡AQUÍ ESTÁ LA SUB-CONSULTA QUE FALTABA (total_deuda)!
+
         String sql = "SELECT p.id_prestamo, u.carnet_docente_alumno, u.Nombres, p.fecha_prestamo, p.estado_general, " +
                      "(SELECT COUNT(*) FROM detalle_prestamo dp WHERE dp.id_prestamo = p.id_prestamo) AS total_items, " +
                      "(SELECT COALESCE(SUM(monto_mora - monto_pagado), 0) FROM detalle_prestamo dp WHERE dp.id_prestamo = p.id_prestamo AND dp.estado_pago_mora = 'Pendiente') AS total_deuda " +
@@ -34,8 +33,6 @@ public class PrestamoDAO {
                 
                 prestamo.setNombres(rs.getString("Nombres"));
                 prestamo.setCarnetDocenteAlumno(rs.getString("carnet_docente_alumno"));
-                
-                // ¡ESTA LÍNEA ES VITAL PARA QUE EL BOTÓN MUESTRE LA CANTIDAD REAL!
                 prestamo.setTotalDeuda(rs.getDouble("total_deuda"));
                 
                 lista.add(prestamo);
@@ -91,7 +88,6 @@ public class PrestamoDAO {
         }
     }
 
-    // --- MÉTODOS PARA VER EL DETALLE DEL PRÉSTAMO ---
 
     public Prestamos obtenerPrestamoPorId(int idPrestamo) {
         Prestamos prestamo = null;
@@ -181,9 +177,6 @@ public class PrestamoDAO {
         return lista;
     }
 
-    // =========================================================================
-    // NUEVA LÓGICA DE NEGOCIO: PAGO "TODO O NADA"
-    // =========================================================================
 
     public boolean procesarDevolucionCompleta(int idPrestamo, boolean pagoCompleto, String observaciones) throws SQLException {
         Connection con = null;
@@ -207,12 +200,10 @@ public class PrestamoDAO {
                     int idEjemplar = (int) row[1];
                     int diasRetraso = (int) row[5];
                     double moraItem = (double) row[7];
-
-                    // Lógica TODO O NADA
                     String estadoPago = (moraItem <= 0) ? "Sin Mora" : (pagoCompleto ? "Pagado" : "Pendiente");
                     double montoPagado = pagoCompleto ? moraItem : 0.0;
 
-                    // A. Actualizar Detalle
+
                     psDetalle.setInt(1, diasRetraso);
                     psDetalle.setDouble(2, moraItem);
                     psDetalle.setDouble(3, montoPagado);
@@ -220,11 +211,9 @@ public class PrestamoDAO {
                     psDetalle.setInt(5, idDetalle);
                     psDetalle.executeUpdate();
 
-                    // B. Liberar Ejemplar a Disponible
                     psEjemplar.setInt(1, idEjemplar);
                     psEjemplar.executeUpdate();
 
-                    // C. Registrar en Devolución
                     psDev.setInt(1, idDetalle);
                     psDev.setString(2, observaciones);
                     psDev.executeUpdate();
@@ -249,7 +238,6 @@ public class PrestamoDAO {
             con = DatabaseConnection.getConnection();
             con.setAutoCommit(false);
 
-            // Liquida toda la mora pendiente de un ticket
             String sql = "UPDATE detalle_prestamo SET monto_pagado = monto_mora, estado_pago_mora = 'Pagado' " +
                     "WHERE id_prestamo = ? AND estado_pago_mora = 'Pendiente'";
             try(PreparedStatement ps = con.prepareStatement(sql)) {
@@ -268,10 +256,6 @@ public class PrestamoDAO {
             if(con!=null) { con.setAutoCommit(true); con.close(); }
         }
     }
-
-    // =========================================================================
-    // MÉTODOS PRIVADOS AUXILIARES
-    // =========================================================================
 
     private void actualizarMoraUsuario(Connection con, int idPrestamo) throws SQLException {
         int idUsuario = 0;
@@ -323,10 +307,6 @@ public class PrestamoDAO {
         }
     }
 
-    // =========================================================================
-    // VALIDACIONES DE REGLAS DE NEGOCIO
-    // =========================================================================
-    
     public int contarLibrosActivosPorUsuario(int idUsuario) {
         int totalActivos = 0;
         String sql = "SELECT COUNT(*) FROM detalle_prestamo dp " +

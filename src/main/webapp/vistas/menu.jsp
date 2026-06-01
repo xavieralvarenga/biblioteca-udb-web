@@ -14,6 +14,7 @@
                     <head>
                         <meta charset="UTF-8">
                         <title>Biblioteca Don Bosco - Menú Principal</title>
+                        <link href="${pageContext.request.contextPath}/assets/img/favicon.png" rel="icon">
                         <style>
                             body {
                                 font-family: Arial, sans-serif;
@@ -167,7 +168,7 @@
 
                                             <%-- MÓDULO 3: PRÉSTAMOS Y DEVOLUCIONES --%>
                                                 <div class="menu-card">
-                                                    <h3 style="color: #28a745;">Préstamos y Moras</h3>
+                                                    <h3 style="color: #28a745;">Préstamos</h3>
                                                     <p>Gestión operativa de préstamos activos, fechas límites y alertas
                                                         algorítmicas de cobro.</p>
                                                     <a href="${pageContext.request.contextPath}/Prestamos?accion=listar"
