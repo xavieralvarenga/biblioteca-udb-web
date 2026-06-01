@@ -185,6 +185,15 @@
                                                             class="btn-enter"
                                                             style="background-color: #6c757d;">Ingresar</a>
                                                     </div>
+                                                    <%-- MÓDULO: LÍMITES DE PRÉSTAMO --%>
+                                                        <div class="menu-card" style="border-color: #0dcaf0;">
+                                                            <h3 style="color: #0dcaf0;">Reglas de Préstamo</h3>
+                                                            <p>Ajustar cantidades y tiempos máximos de préstamo por
+                                                                alumno y docente.</p>
+                                                            <a href="${pageContext.request.contextPath}/ConfiguracionLimites"
+                                                                class="btn-enter"
+                                                                style="background-color: #0dcaf0;">Configurar</a>
+                                                        </div>
 
                                         </c:if>
 

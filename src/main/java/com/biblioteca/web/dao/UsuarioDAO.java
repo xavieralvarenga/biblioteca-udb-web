@@ -191,4 +191,49 @@ public class UsuarioDAO {
         }
         return null;
     }
+
+
+    // =========================================================================
+    // CONFIGURACIÓN DE LÍMITES DE PRÉSTAMO
+    // =========================================================================
+
+    public List<Object[]> obtenerLimitesPrestatarios() {
+        List<Object[]> lista = new ArrayList<>();
+        // Traemos solo los roles operativos (Asumiendo que 2 es Profesor y 3 es Alumno)
+        String sql = "SELECT id_tipo, nombre_rol, max_libros_permitidos, max_dias_prestamo " +
+                     "FROM tipousuario WHERE id_tipo IN (2, 3)";
+
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                lista.add(new Object[]{
+                        rs.getInt("id_tipo"),
+                        rs.getString("nombre_rol"),
+                        rs.getInt("max_libros_permitidos"),
+                        rs.getInt("max_dias_prestamo")
+                });
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener límites de roles: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    public boolean actualizarLimitesPorRol(int idTipo, int maxLibros, int maxDias) {
+        String sql = "UPDATE tipousuario SET max_libros_permitidos = ?, max_dias_prestamo = ? WHERE id_tipo = ?";
+        try (Connection con = DatabaseConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+             
+            ps.setInt(1, maxLibros);
+            ps.setInt(2, maxDias);
+            ps.setInt(3, idTipo);
+            
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar límites del rol: " + e.getMessage());
+            return false;
+        }
+    }
 }
